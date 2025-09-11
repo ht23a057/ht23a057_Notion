@@ -1,0 +1,76 @@
+/* メニューバー本体 */
+#menu-bar {
+    display: flex;
+    background: #2b6cb0;
+    color: white;
+    padding: 8px;
+    gap: 20px;
+    font-family: sans-serif;
+    position: fixed;
+    top: 0;
+    left: 0;
+    z-index: 9999;
+    width: 100%;
+    /* overflow-x: auto; 横スクロールできるように */
+    overflow-y: visible; 
+    scrollbar-width: none; /* Firefox */
+  }
+  
+  /* 各メニュー */
+  .menu {
+    position: relative;
+    cursor: pointer;
+    white-space: nowrap; /* 折り返さない */
+  }
+  
+  /* サブメニュー */
+  .sub {
+    display: none;
+    position: absolute;
+    top: 100%;
+    left: 0;
+    background: white;
+    color: black;
+    border: 1px solid #ccc;
+    min-width: 150px;
+    z-index: 1000;
+  }
+  
+  .sub div {
+    padding: 5px 10px;
+    cursor: pointer;
+  }
+  
+  .sub div:hover {
+    background: #eee;
+  }
+  
+  /* ホバーでサブメニュー表示 */
+  .menu:hover .sub{
+    display: block;
+  }
+  
+  
+  /* 左右ボタン */
+  /* .scroll-btn {
+    position: fixed;
+    top: 8px;
+    width: 30px;
+    height: 30px;
+    background: #2b6cb0;
+    color: white;
+    border: none;
+    border-radius: 50%;
+    cursor: pointer;
+    z-index: 10000;
+    font-size: 18px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  #scroll-left {
+    left: 5px;
+  }
+  #scroll-right {
+    right: 5px;
+  } */
