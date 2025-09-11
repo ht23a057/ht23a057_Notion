@@ -1,0 +1,18 @@
+{
+    "manifest_version": 3,
+    "name": "Notion API Test",
+    "version": "1.0",
+    "permissions": ["storage", "scripting", "activeTab"],
+    "host_permissions": ["https://api.notion.com/*", "https://www.notion.so/*"],
+    "background": {
+      "service_worker": "background.js"
+    },
+    "content_scripts": [
+      {
+        "matches": ["https://www.notion.so/*"],
+        "js": ["content.js"],
+        "css": ["styles.css"]
+      }
+    ]
+  }
+  
