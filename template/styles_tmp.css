@@ -1,0 +1,24 @@
+#notion-template-btn {
+    position: fixed;
+    top: 60px;
+    left: 20px;
+    z-index: 10000;
+    padding: 4px 8px;
+  }
+  
+  #notion-template-modal {
+    position: fixed;
+    top: 100px;
+    left: 50%;
+    transform: translateX(-50%);
+    background: #fff;
+    border: 1px solid #ccc;
+    padding: 10px;
+    z-index: 10001;
+  }
+  #notion-template-modal button {
+    display: block;
+    margin: 4px 0;
+    padding: 4px 8px;
+  }
+  
