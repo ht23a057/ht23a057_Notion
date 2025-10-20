@@ -36,11 +36,11 @@ const blockGroups = [
   {
     group: "メディア",
     blocks: [
-      { label: "画像", type: "image", supported: true },
-      { label: "動画", type: "video", supported: true },
-      { label: "オーディオ", type: "audio", supported: true },
+      { label: "画像", type: "embed", supported: true },
+      { label: "動画", type: "embed", supported: true },
+      { label: "オーディオ", type: "embed", supported: true },
       { label: "コード", type: "code", supported: true },
-      { label: "ファイル", type: "file", supported: true },
+      { label: "ファイル", type: "embed", supported: true },
       { label: "Webブックマーク", type: "bookmark", supported: true },
     ],
   },
@@ -79,19 +79,19 @@ const blockGroups = [
   {
     group: "応用",
     blocks: [
-      { label: "目次", type: "table_of_contents", supported: false },
-      { label: "式ブロック", type: "equation", supported: false },
+      { label: "目次", type: "table_of_contents", supported: true },
+      { label: "式ブロック", type: "equation", supported: true },
       { label: "ボタン", type: "unsupported", supported: false },
-      { label: "階層リンク", type: "breadcrumb", supported: false },
-      { label: "同期ブロック", type: "synced_block", supported: false },
-      { label: "トグル見出し1", type: "heading_1", supported: false },
-      { label: "トグル見出し2", type: "heading_2", supported: false },
-      { label: "トグル見出し3", type: "heading_3", supported: false },
+      { label: "階層リンク", type: "breadcrumb", supported: true },
+      { label: "同期ブロック", type: "synced_block", supported: true },
+      { label: "トグル見出し1", type: "heading_1_toggle", supported: true },
+      { label: "トグル見出し2", type: "heading_2_toggle", supported: true },
+      { label: "トグル見出し3", type: "heading_3_toggle", supported: true },
       { label: "2列", type: "column_list", supported: false },
       { label: "3列", type: "column_list", supported: false },
       { label: "4列", type: "column_list", supported: false },
       { label: "5列", type: "column_list", supported: false },
-      { label: "コード：Mermaid", type: "code", supported: false },
+      { label: "コード：Mermaid", type: "code_Mermaid", supported: true },
       { label: "AIブロック", type: "unsupported", supported: false },
       { label: "AIミーティングノート", type: "unsupported", supported: false },
     ],
@@ -113,68 +113,58 @@ const blockGroups = [
   {
     group: "埋め込み",
     blocks: [
-      { label: "埋め込み", type: "embed", supported: false },
-      { label: "Google Drive", type: "embed", supported: false },
-      { label: "ツイート", type: "embed", supported: false },
-      { label: "GitHub Gist", type: "embed", supported: false },
-      { label: "Googleマップ", type: "embed", supported: false },
-      { label: "Figma", type: "embed", supported: false },
-      { label: "Abstract", type: "embed", supported: false },
-      { label: "Invision", type: "embed", supported: false },
-      { label: "Mixpanel", type: "embed", supported: false },
-      { label: "Framer", type: "embed", supported: false },
-      { label: "Whimsical", type: "embed", supported: false },
-      { label: "Miro", type: "embed", supported: false },
-      { label: "Sketch", type: "embed", supported: false },
-      { label: "Excalidraw", type: "embed", supported: false },
-      { label: "PDF", type: "pdf", supported: false },
-      { label: "Loom", type: "embed", supported: false },
-      { label: "Typeform", type: "embed", supported: false },
-      { label: "Codepen", type: "embed", supported: false },
-      { label: "Replit", type: "embed", supported: false },
-      { label: "Hex", type: "embed", supported: false },
-      { label: "Deepnote", type: "embed", supported: false },
-      { label: "GitLab", type: "embed", supported: false },
-      { label: "Jira", type: "embed", supported: false },
-      { label: "Trello", type: "embed", supported: false },
-      { label: "GitHub", type: "embed", supported: false },
-      { label: "Asana", type: "embed", supported: false },
-      { label: "Slack", type: "embed", supported: false },
-      { label: "Pitch", type: "embed", supported: false },
-      { label: "Dropbox", type: "embed", supported: false },
-      { label: "Zoom", type: "embed", supported: false },
-      { label: "OneDrive", type: "embed", supported: false },
-      { label: "Amplitude", type: "embed", supported: false },
-      { label: "Claap", type: "embed", supported: false },
-      { label: "Box", type: "embed", supported: false },
-      { label: "Linear", type: "embed", supported: false },
-      { label: "Lucidchart", type: "embed", supported: false },
-      { label: "Lucidspark", type: "embed", supported: false },
-      { label: "Eraser", type: "embed", supported: false },
-      { label: "PagerDuty", type: "embed", supported: false },
-      { label: "ClickUp", type: "embed", supported: false },
-      { label: "Adobe XD", type: "embed", supported: false },
-      { label: "Plus", type: "embed", supported: false },
-      { label: "Dovetail", type: "embed", supported: false },
-      { label: "Streak Share", type: "embed", supported: false },
-      { label: "Shortcut", type: "embed", supported: false },
-      { label: "SendOwl", type: "embed", supported: false },
-      { label: "Amplitude-EU", type: "embed", supported: false },
-      { label: "Zendesk", type: "embed", supported: false },
-      { label: "Jira preview(Data center)", type: "embed", supported: false },
-      { label: "Google Contacts", type: "embed", supported: false },
-      { label: "Discord", type: "embed", supported: false },
-      { label: "Microsoft Contacts", type: "embed", supported: false },
-    ],
-  },
-  {
-    group: "同期データベース",
-    blocks: [
-      { label: "GitLab", type: "unsupported", supported: false },
-      { label: "Jira", type: "unsupported", supported: false },
-      { label: "GitHub", type: "unsupported", supported: false },
-      { label: "Asana", type: "unsupported", supported: false },
-      { label: "Jira Sync", type: "unsupported", supported: false },
+      { label: "埋め込み", type: "embed", supported: true },
+      { label: "Google Drive", type: "embed", supported: true },
+      { label: "ツイート", type: "embed", supported: true },
+      { label: "GitHub Gist", type: "embed", supported: true },
+      { label: "Googleマップ", type: "embed", supported: true },
+      { label: "Figma", type: "embed", supported: true },
+      { label: "Abstract", type: "embed", supported: true },
+      { label: "Invision", type: "embed", supported: true },
+      { label: "Mixpanel", type: "embed", supported: true },
+      { label: "Framer", type: "embed", supported: true },
+      { label: "Whimsical", type: "embed", supported: true },
+      { label: "Miro", type: "embed", supported: true },
+      { label: "Sketch", type: "embed", supported: true },
+      { label: "Excalidraw", type: "embed", supported: true },
+      { label: "PDF", type: "embed", supported: true },
+      { label: "Loom", type: "embed", supported: true },
+      { label: "Typeform", type: "embed", supported: true },
+      { label: "Codepen", type: "embed", supported: true },
+      { label: "Replit", type: "embed", supported: true },
+      { label: "Hex", type: "embed", supported: true },
+      { label: "Deepnote", type: "embed", supported: true },
+      { label: "GitLab", type: "embed", supported: true },
+      { label: "Jira", type: "embed", supported: true },
+      { label: "Trello", type: "embed", supported: true },
+      { label: "GitHub", type: "embed", supported: true },
+      { label: "Asana", type: "embed", supported: true },
+      { label: "Slack", type: "embed", supported: true },
+      { label: "Pitch", type: "embed", supported: true },
+      { label: "Dropbox", type: "embed", supported: true },
+      { label: "Zoom", type: "embed", supported: true },
+      { label: "OneDrive", type: "embed", supported: true },
+      { label: "Amplitude", type: "embed", supported: true },
+      { label: "Claap", type: "embed", supported: true },
+      { label: "Box", type: "embed", supported: true },
+      { label: "Linear", type: "embed", supported: true },
+      { label: "Lucidchart", type: "embed", supported: true },
+      { label: "Lucidspark", type: "embed", supported: true },
+      { label: "Eraser", type: "embed", supported: true },
+      { label: "PagerDuty", type: "embed", supported: true },
+      { label: "ClickUp", type: "embed", supported: true },
+      { label: "Adobe XD", type: "embed", supported: true },
+      { label: "Plus", type: "embed", supported: true },
+      { label: "Dovetail", type: "embed", supported: true },
+      { label: "Streak Share", type: "embed", supported: true },
+      { label: "Shortcut", type: "embed", supported: true },
+      { label: "SendOwl", type: "embed", supported: true },
+      { label: "Amplitude-EU", type: "embed", supported: true },
+      { label: "Zendesk", type: "embed", supported: true },
+      { label: "Jira preview(Data center)", type: "embed", supported: true },
+      { label: "Google Contacts", type: "embed", supported: true },
+      { label: "Discord", type: "embed", supported: true },
+      { label: "Microsoft Contacts", type: "embed", supported: true },
     ],
   },
   {
@@ -204,24 +194,24 @@ const blockGroups = [
   {
     group: "ブロックタイプの変換",
     blocks: [
-      { label: "テキスト", type: "paragraph", supported: false },
-      { label: "見出し1", type: "heading_1", supported: false },
-      { label: "見出し2", type: "heading_2", supported: false },
-      { label: "見出し3", type: "heading_3", supported: false },
+      { label: "テキスト", type: "paragraph", supported: true },
+      { label: "見出し1", type: "heading_1", supported: true },
+      { label: "見出し2", type: "heading_2", supported: true },
+      { label: "見出し3", type: "heading_3", supported: true },
       { label: "ページ", type: "child_page", supported: false },
       { label: "ページとして移動", type: "unsupported", supported: false },
-      { label: "箇条書きリスト", type: "bulleted_list_item", supported: false },
-      { label: "番号付きリスト", type: "numbered_list_item", supported: false },
-      { label: "ToDoリスト", type: "to_do", supported: false },
-      { label: "トグルリスト", type: "toggle", supported: false },
-      { label: "コード", type: "code", supported: false },
-      { label: "引用", type: "quote", supported: false },
-      { label: "コールアウト", type: "callout", supported: false },
-      { label: "式ブロック", type: "equation", supported: false },
-      { label: "同期ブロック", type: "synced_block", supported: false },
-      { label: "トグル見出し1", type: "heading_1", supported: false },
-      { label: "トグル見出し2", type: "heading_2", supported: false },
-      { label: "トグル見出し3", type: "heading_3", supported: false },
+      { label: "箇条書きリスト", type: "bulleted_list_item", supported: true },
+      { label: "番号付きリスト", type: "numbered_list_item", supported: true },
+      { label: "ToDoリスト", type: "to_do", supported: true },
+      { label: "トグルリスト", type: "toggle", supported: true },
+      { label: "コード", type: "code", supported: true },
+      { label: "引用", type: "quote", supported: true },
+      { label: "コールアウト", type: "callout", supported: true },
+      { label: "式ブロック", type: "equation", supported: true },
+      { label: "同期ブロック", type: "synced_block", supported: true },
+      { label: "トグル見出し1", type: "heading_1", supported: true },
+      { label: "トグル見出し2", type: "heading_2", supported: true },
+      { label: "トグル見出し3", type: "heading_3", supported: true },
       { label: "2列", type: "column_list", supported: false },
       { label: "3列", type: "column_list", supported: false },
       { label: "4列", type: "column_list", supported: false },
@@ -244,45 +234,38 @@ const blockGroups = [
   {
     group: "テキストの色",
     blocks: [
-      { label: "既定のテキスト", type: "unsupported", supported: false },
-      { label: "灰色のテキスト", type: "unsupported", supported: false },
-      { label: "茶色のテキスト", type: "unsupported", supported: false },
-      { label: "オレンジ色のテキスト", type: "unsupported", supported: false },
-      { label: "黄色のテキスト", type: "unsupported", supported: false },
-      { label: "緑色のテキスト", type: "unsupported", supported: false },
-      { label: "青色のテキスト", type: "unsupported", supported: false },
-      { label: "紫色のテキスト", type: "unsupported", supported: false },
-      { label: "ピンク色のテキスト", type: "unsupported", supported: false },
-      { label: "赤色のテキスト", type: "unsupported", supported: false },
+      { label: "既定のテキスト", type: "normal_text", supported: true },
+      { label: "灰色のテキスト", type: "gray_text", supported: true },
+      { label: "茶色のテキスト", type: "brown_text", supported: true },
+      { label: "オレンジ色のテキスト", type: "orange_text", supported: true },
+      { label: "黄色のテキスト", type: "yellow_text", supported: true },
+      { label: "緑色のテキスト", type: "green_text", supported: true },
+      { label: "青色のテキスト", type: "blue_text", supported: true },
+      { label: "紫色のテキスト", type: "purple_text", supported: true },
+      { label: "ピンク色のテキスト", type: "pink_text", supported: true },
+      { label: "赤色のテキスト", type: "red_text", supported: true },
     ],
   },
   {
     group: "背景色",
     blocks: [
-      { label: "背景色なし", type: "unsupported", supported: false },
-      { label: "背景色：グレー", type: "unsupported", supported: false },
-      { label: "背景色：ブラウン", type: "unsupported", supported: false },
-      { label: "背景色：オレンジ", type: "unsupported", supported: false },
-      { label: "背景色：黄色", type: "unsupported", supported: false },
-      { label: "背景色：緑", type: "unsupported", supported: false },
-      { label: "背景色：青", type: "unsupported", supported: false },
-      { label: "背景色：紫", type: "unsupported", supported: false },
-      { label: "背景色：ピンク", type: "unsupported", supported: false },
-      { label: "背景色：赤", type: "unsupported", supported: false },
+      { label: "背景色なし", type: "normal", supported: true },
+      { label: "背景色：グレー", type: "gray", supported: true },
+      { label: "背景色：ブラウン", type: "brown", supported: true },
+      { label: "背景色：オレンジ", type: "orange", supported: true },
+      { label: "背景色：黄色", type: "yellow", supported: true },
+      { label: "背景色：緑", type: "green", supported: true },
+      { label: "背景色：青", type: "blue", supported: true },
+      { label: "背景色：紫", type: "purple", supported: true },
+      { label: "背景色：ピンク", type: "pink", supported: true },
+      { label: "背景色：赤", type: "red", supported: true },
     ],
   },
 ];
 
-// ファイル拡張子指定
-const fileAcceptMap = {
-  image: ".png,.jpg,.jpeg,.gif,.webp",
-  video: ".mp4,.webm,.mov,.avi",
-  audio: ".mp3,.wav,.ogg",
-  file: "*/*",
-};
-
+//メニューバー生成
 function injectMenuBar() {
-  if (document.getElementById("notion-menu-bar")) return; //重複防止
+  if (document.getElementById("notion-menu-bar")) return;
 
   //DOMの生成
   const menuBar = document.createElement("div");
@@ -307,66 +290,13 @@ function injectMenuBar() {
       btn.innerText = b.label;
       btn.className = "submenu-item";
 
-      //ボタンのクイックハンドラ
       if (!b.supported) btn.classList.add("disabled"); //無効表示
       else {
         btn.onclick = () => {
           const pageId = extractPageId(window.location.href);
           if (!pageId) return console.error("ページIDを取得できませんでした");
 
-          // ファイル/URL選択部分
-          if (["image", "video", "audio", "file"].includes(b.type)) {
-            const mode = confirm(
-              "OK=ファイルアップロード / キャンセル=URL指定"
-            );
-            const pageId = extractPageId(window.location.href);
-            if (!pageId) return console.error("ページID取得失敗");
-
-            if (mode) {
-              const input = document.createElement("input");
-              input.type = "file";
-              input.accept = fileAcceptMap[b.type] || "*/*";
-              input.onchange = () => {
-                const file = input.files[0];
-                if (!file) return;
-
-                chrome.runtime.sendMessage(
-                  {
-                    action: "addMediaBlock",
-                    pageId,
-                    type: b.type,
-                    file, // そのまま File オブジェクトを渡す
-                  },
-                  (res) => {
-                    if (!res) return console.error("レスポンスなし");
-                    if (!res.success) console.error(res.error);
-                    else console.log("アップロード成功", res.data);
-                  }
-                );
-              };
-              input.click();
-            } else {
-              const url = prompt("URLを入力してください:");
-              if (!url) return;
-
-              chrome.runtime.sendMessage(
-                {
-                  action: "addMediaBlock",
-                  pageId,
-                  type: b.type,
-                  url,
-                },
-                (res) => {
-                  if (!res) return console.error("レスポンスなし");
-                  if (!res.success) console.error(res.error);
-                  else console.log("URL追加成功", res.data);
-                }
-              );
-            }
-            return; // メディアの場合は通常ブロック送信をスキップ
-          }
-
-          // ブロック追加の確認　メディア以外
+          // ブロック追加の確認
           chrome.runtime.sendMessage(
             { action: "appendBlock", type: b.type, pageId },
             (res) => {
@@ -412,10 +342,9 @@ function extractPageId(url) {
   );
 }
 
-// メニュー表示・閉じる系
 function toggleMenu(list) {
   if (!document.body.contains(list)) document.body.appendChild(list);
-
+  // サブメニュー表示/非表示
   document.querySelectorAll(".submenu.open").forEach((s) => {
     if (s !== list) closeMenu(s);
   });
@@ -425,6 +354,7 @@ function toggleMenu(list) {
 }
 
 function closeMenu(list) {
+  //他の場所をクリックしたらメニューを閉じる
   list.classList.remove("open");
   list.style.top = "";
   list.style.left = "";

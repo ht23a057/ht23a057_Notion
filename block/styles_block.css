@@ -1,92 +1,92 @@
 /* メニューバー本体 */
 #notion-menu-bar {
-    display: flex;
-    background: #2b6cb0;
-    color: white;
-    padding: 8px;
-    gap: 20px;
-    font-family: sans-serif;
-    position: fixed;
-    top: 0;
-    left: 0;
-    z-index: 9999;
-    width: 100%;
-    overflow-x: auto;
-    overflow-y: visible;
-    scrollbar-width: none; /* Firefox */
-    white-space: nowrap; /* 折り返さない */
-  }
-  
-  /* 各メニューセクション */
-  .menu-section {
-    position: relative;
-    cursor: pointer;
-    /* white-space: nowrap; */
-    flex-shrink: 0; /* 狭くても潰れない */
-  }
-  
-  /* メニュータイトル（親ボタン） */
-  .menu-title {
-    font-weight: bold;
-    padding: 6px 12px;
-    background: #2b6cb0;
-    color: white;
-    border-radius: 4px;
-    user-select: none;
-    transition: background 0.2s;
-  }
-  
-  .menu-title:hover {
-    background: #2c5282;
-  }
-  
-  /* サブメニュー */
-  .submenu {
-    display: none;
-    position: fixed; 
-    background: white;
-    color: black;
-    border: 1px solid #ccc;
-    min-width: 150px;
-    z-index: 10000; /* メニューバーより上に */
-    flex-direction: column;
-    box-shadow: 0 2px 6px rgba(0,0,0,0.15);
-    overflow-y: auto;
-    /* scrollbar-width: none; Firefox */
-    -webkit-overflow-scrolling: touch;
-    max-width: calc(100vw - 16px); /* 画面端に被らないように */
-    box-sizing: border-box;
-    overflow-x: hidden;
-  }
-  
-  
-  /* open クラスが付いたとき表示 */
-  .submenu.open {
-    display: flex;
-  }
-  
-  /* サブメニューのアイテム */
-  .submenu-item {
-    padding: 6px 12px;
-    cursor: pointer;
-    text-align: left;
-    white-space: nowrap;
-    background: white;
-    border-bottom: 1px solid #eee;
-    transition: background 0.2s;
-  }
-  
-  .submenu-item:last-child {
-    border-bottom: none;
-  }
-  
-  .submenu-item:hover:not(.disabled) {
-    background: #f0f0f0;
-  }
-  
-  .submenu-item.disabled {
-    background: #f9f9f9;
-    color: #aaa;
-    cursor: not-allowed;
-  }
-  
+  display: flex;
+  background: #2b6cb0;
+  color: white;
+  padding: 1px;
+  gap: 20px; /*各メニューの間隔 */
+  font-family: sans-serif;
+  /* ページ上部に表示 */
+  position: fixed;
+  top: 30px;
+  left: 120px;   /* 左端から10px離す */
+  right: 120px;  /* 右端から10px離す */
+  z-index: 9999; /*他の要素より手前に表示*/
+  width: auto;
+  overflow-x: auto;
+  overflow-y: visible;
+  scrollbar-width: none; /* Firefoxでスクロールバーを非表示 */
+  white-space: nowrap; /* 折り返さない */
+}
+
+/* 各メニューセクション */
+.menu-section {
+  position: relative;
+  cursor: pointer; 
+  flex-shrink: 0; /* flexレイアウトで縮まないように */
+}
+
+/* メニュータイトル（親ボタン） */
+.menu-title {
+  font-weight: bold;
+  padding: 4px 10px;
+  background: #2b6cb0;
+  color: white;
+  border-radius: 4px;
+  user-select: none;
+  transition: background 0.2s;
+}
+
+.menu-title:hover {
+  background: #2c5282;
+}
+
+/* サブメニュー */
+.submenu {
+  display: none; /*初期状態は非表示*/
+  position: fixed;  /*スクロールしても位置を維持*/
+  background: white;
+  color: black;
+  border: 1px solid #ccc;
+  min-width: 150px;
+  z-index: 10000; /* メニューバーより上に */
+  flex-direction: column; /*ボタンを縦に並べる*/
+  box-shadow: 0 2px 6px rgba(0,0,0,0.15);
+  overflow-y: auto; /*高さが足りないとスクロール*/
+  /* scrollbar-width: none; Firefox */
+  -webkit-overflow-scrolling: touch;
+  max-width: calc(100vw - 16px); /* 画面端に被らないように */
+  box-sizing: border-box;
+  overflow-x: hidden;
+}
+
+
+/* open クラスが付いたとき表示 */
+.submenu.open {
+  display: flex;
+}
+
+/* サブメニューのアイテム */
+.submenu-item {
+  padding: 6px 12px;
+  cursor: pointer;
+  text-align: left;
+  white-space: nowrap;
+  background: white;
+  border-bottom: 1px solid #eee;
+  transition: background 0.2s;
+}
+
+.submenu-item:last-child {
+  border-bottom: none;
+}
+
+.submenu-item:hover:not(.disabled) {
+  background: #f0f0f0;
+}
+
+.submenu-item.disabled {
+  background: #f9f9f9;
+  color: #aaa;
+  cursor: not-allowed;
+}
