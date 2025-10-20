@@ -1,24 +1,63 @@
 #notion-template-btn {
-    position: fixed;
-    top: 60px;
-    left: 20px;
-    z-index: 10000;
-    padding: 4px 8px;
-  }
-  
-  #notion-template-modal {
-    position: fixed;
-    top: 100px;
-    left: 50%;
-    transform: translateX(-50%);
-    background: #fff;
-    border: 1px solid #ccc;
-    padding: 10px;
-    z-index: 10001;
-  }
-  #notion-template-modal button {
-    display: block;
-    margin: 4px 0;
-    padding: 4px 8px;
-  }
-  
+  position: fixed;
+  top: 60px;
+  left: 20px;
+  z-index: 10000;
+  padding: 6px 10px;
+  background: #fff;
+  border: 1px solid #ccc;
+  border-radius: 6px;
+  cursor: pointer;
+  font-size: 13px;
+  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
+}
+
+#notion-template-modal {
+  position: fixed;
+  top: 50%;
+  left: 50%;
+  transform: translate(-50%, -50%);
+  z-index: 10001;
+  background: #fff;
+  padding: 20px;
+  border-radius: 10px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
+  text-align: center;
+  min-width: 300px;
+}
+
+.template-scroll-container {
+  display: flex;
+  justify-content: center;
+  align-items: center;
+  margin: 6px 0;
+}
+
+.scroll-btn {
+  padding: 4px 8px;
+  margin: 0 4px;
+  border: 1px solid #ccc;
+  border-radius: 4px;
+  background: #eee;
+  cursor: pointer;
+}
+
+.scroll-btn:hover {
+  background: #ddd;
+}
+
+.template-option-btn,
+.template-insert-btn {
+  padding: 6px 12px;
+  margin: 0 4px;
+  border: none;
+  border-radius: 6px;
+  background: #f5f5f5;
+  cursor: pointer;
+  transition: background 0.2s;
+}
+
+.template-option-btn:hover,
+.template-insert-btn:hover {
+  background: #e8e8e8;
+}
