@@ -1,164 +1,178 @@
 (async () => {
-  // 仮テンプレートデータ（画像追加）
-  const template1 = [
-    {
-      type: "paragraph",
-      paragraph: {
-        rich_text: [{ text: { content: "シンプルテンプレート1" } }],
-      },
-    },
-    { image: "https://via.placeholder.com/100?text=Simple1" },
-  ];
-  const template2 = [
-    {
-      type: "paragraph",
-      paragraph: {
-        rich_text: [{ text: { content: "よく利用テンプレート1" } }],
-      },
-    },
-    { image: "https://via.placeholder.com/100?text=Frequent1" },
-  ];
-
-  const templates = {
-    simple: [template1, template1, template1, template1, template1],
-    frequent: [template2, template2, template2, template2, template2],
-  };
-
-  // ボタン注入
-  const observer = new MutationObserver(() => {
-    if (!document.getElementById("notion-template-btn") && document.body) {
-      injectTemplateButton();
-    }
-  });
-  observer.observe(document.body || document.documentElement, {
-    childList: true,
-    subtree: true,
-  });
-
-  function injectTemplateButton() {
-    const btn = document.createElement("button");
-    btn.id = "notion-template-btn";
-    btn.innerText = "テンプレート挿入";
-    document.body.appendChild(btn);
-    btn.onclick = () => openTemplateModal();
+  // お気に入りデータ取得/保存
+  async function getFavorites() {
+    return new Promise((resolve) => {
+      chrome.storage.local.get("favorites", (data) => {
+        resolve(data.favorites || []);
+      });
+    });
+  }
+  //テンプレートが重複しないように
+  async function saveFavorites(favorites) {
+    const uniqueFavorites = favorites.filter(
+      (fav, i, arr) => i === arr.findIndex((f) => f.url === fav.url)
+    );
+    return new Promise((resolve) => {
+      chrome.storage.local.set({ favorites: uniqueFavorites }, resolve);
+    });
   }
 
-  // テンプレート一覧モーダル
-  function openTemplateModal() {
-    const modal = createModal("テンプレート一覧");
+  //サムネ画像取得
+  async function getTemplateThumbnail(maxRetry = 5) {
+    for (let attempt = 0; attempt < maxRetry; attempt++) {
+      const imgs = [...document.querySelectorAll("img")].filter((img) =>
+        img.src.includes("notion-static.com/template/")
+      );
 
-    Object.entries(templates).forEach(([category, list]) => {
-      const catTitle = document.createElement("h4");
-      catTitle.innerText =
-        category === "simple"
-          ? "シンプルなテンプレート"
-          : "よく利用しているテンプレート";
-      modal.appendChild(catTitle);
+      if (imgs.length > 0) return imgs[0].src;
 
-      const container = document.createElement("div");
-      container.className = "template-scroll-container";
+      await new Promise((r) => setTimeout(r, 1000));
+    }
+    return "";
+  }
 
-      let currentIndex = 0;
-      const render = () => {
-        container.innerHTML = "";
+  //お気に入りに登録用ボタンの作成
+  async function injectFavoriteButton() {
+    if (!location.href.includes("/marketplace/templates/")) return; // /templates/ を含むURLのみでボタン生成
+    if (document.getElementById("single-fav-btn")) return; // 重複防止
 
-        const leftBtn = document.createElement("button");
-        leftBtn.className = "scroll-btn";
-        leftBtn.innerText = "←";
-        leftBtn.onclick = () => {
-          currentIndex = (currentIndex - 1 + list.length) % list.length;
-          render();
-        };
-        container.appendChild(leftBtn);
+    const coverUrl = await getTemplateThumbnail();
+    console.log("選択されたテンプレートサムネイル:", coverUrl);
 
-        const tmpl = list[currentIndex];
-        const tbtn = document.createElement("div");
-        tbtn.className = "template-card";
-        tbtn.onclick = () => openTemplatePreviewModal(tmpl, catTitle.innerText);
+    const favorites = await getFavorites();
+    const currentUrl = location.href;
+    const isFav = favorites.some((f) => f.url === currentUrl);
 
-        // 画像
-        if (tmpl[1]?.image) {
-          const img = document.createElement("img");
-          img.src = tmpl[1].image;
-          img.alt = `テンプレート${currentIndex + 1}`;
-          img.className = "template-thumb";
-          tbtn.appendChild(img);
-        }
+    const favBtn = document.createElement("button");
+    favBtn.id = "single-fav-btn";
+    favBtn.innerText = isFav ? "お気に入りから削除" : "お気に入りに登録";
+    document.body.appendChild(favBtn);
 
-        // ラベル
-        const label = document.createElement("p");
-        label.innerText = `テンプレート ${currentIndex + 1}`;
-        tbtn.appendChild(label);
+    favBtn.onclick = async () => {
+      let updatedFavorites = await getFavorites();
+      const index = updatedFavorites.findIndex((f) => f.url === currentUrl);
 
-        container.appendChild(tbtn);
+      if (index >= 0) {
+        updatedFavorites.splice(index, 1);
+        favBtn.innerText = "お気に入りに登録";
+      } else {
+        const cleanTitle = document.title
+          .replace(/\|?Notion\s*テンプレート/g, "") // 日本語版
+          .replace(/\|\s*Notion\s*Template/g, "") // 英語版
+          .replace(/‐\s*Notion.*/g, "") // "– Notion" パターン対応
+          .trim();
+        updatedFavorites.push({
+          url: currentUrl,
+          name: cleanTitle,
+          coverUrl: coverUrl,
+        });
+        favBtn.innerText = "お気に入りから削除";
+        console.log("お気に入りに登録しました：", coverUrl);
+        console.log("テンプレート名前", cleanTitle);
+      }
 
-        const rightBtn = document.createElement("button");
-        rightBtn.className = "scroll-btn";
-        rightBtn.innerText = "→";
-        rightBtn.onclick = () => {
-          currentIndex = (currentIndex + 1) % list.length;
-          render();
-        };
-        container.appendChild(rightBtn);
-      };
-      render();
-      modal.appendChild(container);
-    });
+      await saveFavorites(updatedFavorites);
+    };
+
+    document.body.appendChild(favBtn);
+  }
+
+  // モーダル作成
+  function createModal(titleText) {
+    const modalOverlay = document.createElement("div");
+    modalOverlay.id = "notion-template-modal-overlay";
+
+    const modal = document.createElement("div");
+    modal.id = "notion-template-modal";
+
+    const title = document.createElement("h3");
+    title.innerText = titleText;
+    modal.appendChild(title);
 
     const closeBtn = document.createElement("button");
     closeBtn.id = "template-close-btn";
     closeBtn.innerText = "閉じる";
-    closeBtn.onclick = () => document.body.removeChild(modal);
+    closeBtn.onclick = () => {
+      document.body.removeChild(modalOverlay);
+      document.body.style.overflow = "";
+    };
     modal.appendChild(closeBtn);
 
-    document.body.appendChild(modal);
-  }
+    modalOverlay.appendChild(modal);
+    document.body.appendChild(modalOverlay);
+    document.body.style.overflow = "hidden";
 
-  // プレビューモーダル
-  function openTemplatePreviewModal(template, categoryLabel) {
-    const modal = createModal(`${categoryLabel} プレビュー`);
-
-    template.forEach((block) => {
-      if (block.type === "paragraph") {
-        const p = document.createElement("p");
-        p.innerText = block.paragraph.rich_text[0].text.content;
-        modal.appendChild(p);
-      }
-      if (block.image) {
-        const img = document.createElement("img");
-        img.src = block.image;
-        img.className = "template-thumb-large";
-        modal.appendChild(img);
-      }
-    });
-
-    const insertBtn = document.createElement("button");
-    insertBtn.className = "template-insert-btn";
-    insertBtn.innerText = "このテンプレートを挿入";
-    insertBtn.onclick = () => {
-      console.log("テンプレート挿入", template);
-      document.body.removeChild(modal);
-    };
-    modal.appendChild(insertBtn);
-
-    const backBtn = document.createElement("button");
-    backBtn.className = "template-option-btn";
-    backBtn.innerText = "戻る";
-    backBtn.onclick = () => {
-      document.body.removeChild(modal);
-      openTemplateModal();
-    };
-    modal.appendChild(backBtn);
-
-    document.body.appendChild(modal);
-  }
-
-  function createModal(titleText) {
-    const modal = document.createElement("div");
-    modal.id = "notion-template-modal";
-    const title = document.createElement("h3");
-    title.innerText = titleText;
-    modal.appendChild(title);
     return modal;
   }
+
+  // モーダルでお気に入り一覧を表示
+  async function openTemplateModal() {
+    const modal = createModal("お気に入りテンプレート");
+    const favorites = await getFavorites();
+
+    const container = document.createElement("div");
+    container.className = "template-scroll-container";
+
+    favorites.forEach((tmpl) => {
+      const card = document.createElement("div");
+      card.className = "template-card";
+
+      if (tmpl.coverUrl) {
+        const img = document.createElement("img");
+        img.src = tmpl.coverUrl;
+        img.onload = () => console.log("画像読み込み成功:", tmpl.coverUrl);
+        img.onerror = () => console.warn("画像読み込み失敗:", tmpl.coverUrl);
+        card.appendChild(img);
+      } else {
+        console.warn("coverUrl が存在しない:", tmpl);
+      }
+
+      const label = document.createElement("p");
+      label.innerText = tmpl.name;
+      card.appendChild(label);
+      //削除ボタン　追加
+      const removeBtn = document.createElement("button");
+      removeBtn.innerText = "削除";
+      removeBtn.style.backgroundColor = "#dbb8b9";
+      removeBtn.style.marginTop = "5px";
+      removeBtn.style.fontSize = "12px";
+      removeBtn.onclick = async (e) => {
+        e.stopPropagation(); // カードクリックでページ遷移させない
+        const updatedFavorites = (await getFavorites()).filter(
+          (f) => f.url !== tmpl.url
+        );
+        await saveFavorites(updatedFavorites);
+        container.removeChild(card); // モーダルから削除
+      };
+      card.appendChild(removeBtn);
+
+      card.onclick = () => {
+        if (tmpl.url) window.location.href = tmpl.url;
+      };
+      container.appendChild(card);
+    });
+    modal.appendChild(container);
+  }
+
+  // テンプレート挿入ボタン
+  function injectTemplateButton() {
+    if (document.getElementById("notion-template-btn")) return;
+    if (location.href.includes("/marketplace/templates/")) return;
+
+    const btn = document.createElement("button");
+    btn.id = "notion-template-btn";
+    btn.innerText = "お気に入り一覧";
+    btn.onclick = openTemplateModal;
+
+    document.body.appendChild(btn);
+  }
+
+  // 初期化
+  injectFavoriteButton();
+  injectTemplateButton();
+
+  const observer = new MutationObserver(() => {
+    injectFavoriteButton();
+  });
+  observer.observe(document.body, { childList: true, subtree: true });
 })();

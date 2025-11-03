@@ -1,63 +1,100 @@
-#notion-template-btn {
-  position: fixed;
-  top: 60px;
-  left: 20px;
-  z-index: 10000;
-  padding: 6px 10px;
-  background: #fff;
+/* お気に入りボタン */
+#single-fav-btn {
+  position: absolute;
+  top: 90px;
+  right: 20px;
+  z-index: 1000;
+  padding: 10px 15px;
+  font-size: 14px;
+  background-color: #f5f5f5;
   border: 1px solid #ccc;
-  border-radius: 6px;
   cursor: pointer;
-  font-size: 13px;
-  box-shadow: 0 1px 4px rgba(0, 0, 0, 0.1);
 }
 
-#notion-template-modal {
+
+/* モーダルオーバーレイ */
+#notion-template-modal-overlay {
   position: fixed;
-  top: 50%;
-  left: 50%;
-  transform: translate(-50%, -50%);
-  z-index: 10001;
-  background: #fff;
-  padding: 20px;
-  border-radius: 10px;
-  box-shadow: 0 4px 10px rgba(0,0,0,0.2);
-  text-align: center;
-  min-width: 300px;
-}
-
-.template-scroll-container {
+  top: 0;
+  left: 0;
+  width: 100%;
+  height: 100%;
+  background-color: rgba(0,0,0,0.5);
+  z-index: 10000;
   display: flex;
   justify-content: center;
   align-items: center;
-  margin: 6px 0;
 }
 
-.scroll-btn {
-  padding: 4px 8px;
-  margin: 0 4px;
+/* モーダル本体 */
+#notion-template-modal {
+  background-color: white;
+  padding: 20px;
+  border: 2px solid #333;
+  max-height: 80%;
+  overflow-y: auto;
+}
+
+/* スクロールコンテナ */
+.template-scroll-container {
+  display: grid;
+  grid-template-columns: repeat(3, minmax(150px, 1fr)); /* 最低150pxで自動3列 */
+  gap: 15px;  /* カードの間隔 */
+  padding: 10px;
+  justify-items: center; /* 中央揃え */
+}
+
+/* テンプレートカード */
+.template-card {
   border: 1px solid #ccc;
-  border-radius: 4px;
-  background: #eee;
+  padding: 10px;
   cursor: pointer;
+  text-align: center;
+  width: 100%;
+  max-width: 00px;
+  border-radius: 8px;
+  background-color: #fff;
+  box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+  transition: transform 0.2s ease, box-shadow 0.2s ease;
+}
+.template-card:hover {
+  transform: translateY(-3px);
+  box-shadow: 0 4px 8px rgba(0, 0, 0, 0.2);
 }
 
-.scroll-btn:hover {
-  background: #ddd;
-}
-
-.template-option-btn,
-.template-insert-btn {
-  padding: 6px 12px;
-  margin: 0 4px;
-  border: none;
+/* 画像 */
+.template-card img {
+  width: 100%;
+  height: auto; /* アスペクト比維持 */
+  display: block;
   border-radius: 6px;
-  background: #f5f5f5;
-  cursor: pointer;
-  transition: background 0.2s;
+  margin-bottom: 8px;
+}
+/* タイトル（自然に折り返し） */
+.template-card p {
+  font-size: 13px;
+  line-height: 1.4;
+  font-weight: normal;
+  color: #333;
+  word-break: break-word; /* 長い単語も折り返す */
+  white-space: normal;    /* 折り返し許可 */
 }
 
-.template-option-btn:hover,
-.template-insert-btn:hover {
-  background: #e8e8e8;
+/* 閉じるボタン */
+#template-close-btn {
+  margin-top: 10px;
+  padding: 5px 10px;
+  cursor: pointer;
+}
+
+/* テンプレート挿入ボタン */
+#notion-template-btn {
+  position: fixed;
+  top: 30px;
+  right: 20px;
+  z-index: 9999;
+  padding: 8px 12px;
+  background-color: #f5f5f5;
+  border: 1px solid #ccc;
+  cursor: pointer;
 }
