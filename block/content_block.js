@@ -1,3 +1,13 @@
+//URL変わったらリロードする
+let currentUrl = location.href;
+setInterval(() => {
+  if (location.href !== currentUrl) {
+    currentUrl = location.href;
+    console.log("URLが変わった！リロードします:", currentUrl);
+    location.reload(); // ページをリロード
+  }
+}, 500); // 0.5秒ごとにチェック
+
 const blockGroups = [
   {
     group: "基本",
@@ -87,10 +97,10 @@ const blockGroups = [
       { label: "トグル見出し1", type: "heading_1_toggle", supported: true },
       { label: "トグル見出し2", type: "heading_2_toggle", supported: true },
       { label: "トグル見出し3", type: "heading_3_toggle", supported: true },
-      { label: "2列", type: "column_list", supported: false },
-      { label: "3列", type: "column_list", supported: false },
-      { label: "4列", type: "column_list", supported: false },
-      { label: "5列", type: "column_list", supported: false },
+      { label: "2列", type: "column_list_2", supported: true },
+      { label: "3列", type: "column_list_3", supported: true },
+      { label: "4列", type: "column_list_4", supported: true },
+      { label: "5列", type: "column_list_5", supported: true },
       { label: "コード：Mermaid", type: "code_Mermaid", supported: true },
       { label: "AIブロック", type: "unsupported", supported: false },
       { label: "AIミーティングノート", type: "unsupported", supported: false },
@@ -209,13 +219,13 @@ const blockGroups = [
       { label: "コールアウト", type: "callout", supported: true },
       { label: "式ブロック", type: "equation", supported: true },
       { label: "同期ブロック", type: "synced_block", supported: true },
-      { label: "トグル見出し1", type: "heading_1", supported: true },
-      { label: "トグル見出し2", type: "heading_2", supported: true },
-      { label: "トグル見出し3", type: "heading_3", supported: true },
-      { label: "2列", type: "column_list", supported: false },
-      { label: "3列", type: "column_list", supported: false },
-      { label: "4列", type: "column_list", supported: false },
-      { label: "5列", type: "column_list", supported: false },
+      { label: "トグル見出し1", type: "heading_1_toggle", supported: true },
+      { label: "トグル見出し2", type: "heading_2_toggle", supported: true },
+      { label: "トグル見出し3", type: "heading_3_toggle", supported: true },
+      { label: "2列", type: "column_list_2", supported: true },
+      { label: "3列", type: "column_list_3", supported: true },
+      { label: "4列", type: "column_list_4", supported: true },
+      { label: "5列", type: "column_list_5", supported: true },
     ],
   },
   {
@@ -263,11 +273,133 @@ const blockGroups = [
   },
 ];
 
+// ページID抽出
+function extractPageId(url) {
+  const match = url.match(/[0-9a-f]{32}/);
+  if (!match) return console.log("ページIDが見つかりません");
+  const id = match[0];
+  return (
+    id.substr(0, 8) +
+    "-" +
+    id.substr(8, 4) +
+    "-" +
+    id.substr(12, 4) +
+    "-" +
+    id.substr(16, 4) +
+    "-" +
+    id.substr(20)
+  );
+}
+
+//カーソル位置を取得
+let SelectBlockId = null; //最後に選択されたブロックIDを保持
+// data-block-id をたどって探す関数
+function findBlockIdFromNode(node) {
+  while (node && node !== document) {
+    if (node.getAttribute && node.getAttribute("data-block-id")) {
+      return node.getAttribute("data-block-id");
+    }
+    node = node.parentElement;
+  }
+  return null;
+}
+//カーソル位置のブロックIDを更新
+function updateSelectBlockId() {
+  const sel = window.getSelection();
+  const node = sel?.anchorNode;
+  const blockId = findBlockIdFromNode(node?.parentElement || node);
+  if (blockId) SelectBlockId = blockId;
+  console.log("カーソル位置", SelectBlockId); //カーソル位置をコンソールに出す
+}
+document.addEventListener("mouseup", updateSelectBlockId);
+document.addEventListener("keyup", updateSelectBlockId);
+document.addEventListener("focusin", updateSelectBlockId);
+document.addEventListener("selectionchange", updateSelectBlockId);
+
+//トークン接続のエラー
+function showErrorModal(message) {
+  // 既存のモーダルがあれば削除
+  const old = document.getElementById("my-error-modal");
+  if (old) old.remove();
+
+  // モーダル外枠
+  const modal = document.createElement("div");
+  modal.id = "my-error-modal";
+  modal.className = "my-modal-overlay";
+
+  // 中のボックス
+  const box = document.createElement("div");
+  box.className = "my-modal-box";
+
+  const title = document.createElement("div");
+  title.className = "my-modal-title";
+  title.textContent = "エラーが発生しました";
+
+  const msg = document.createElement("div");
+  msg.className = "my-modal-message";
+  msg.innerHTML = message;
+
+  const btn = document.createElement("button");
+  btn.className = "my-modal-button";
+  btn.textContent = "OK";
+  btn.onclick = () => modal.remove();
+
+  box.appendChild(title);
+  box.appendChild(msg);
+  box.appendChild(btn);
+
+  modal.appendChild(box);
+  document.body.appendChild(modal);
+}
+
+//色に関して
+function createColorIcon(color) {
+  const div = document.createElement("div");
+  div.style.width = "18px";
+  div.style.height = "18px";
+  div.style.backgroundColor = color;
+  div.style.border = "1px solid #ccc";
+  div.style.marginRight = "8px";
+  div.style.display = "inline-block";
+  return div;
+}
+
 //メニューバー生成
 function injectMenuBar() {
   if (document.getElementById("notion-menu-bar")) return;
 
-  //DOMの生成
+  // URLを確認して、marketplace/にいる場合はボタン非表示
+  if (location.href.includes("https://www.notion.so/marketplace")) return;
+
+  //テキストの色のアイコン
+  const textColorMap = {
+    normal_text: "#000000",
+    gray_text: " #787878",
+    brown_text: "rgb(158, 110, 76)",
+    orange_text: "#FFA500",
+    yellow_text: "rgb(221, 192, 27)",
+    green_text: "rgb(55, 141, 55)",
+    blue_text: "	#4169E1",
+    purple_text: "#a184db",
+    pink_text: "#FF69B4",
+    red_text: "#FF0000",
+  };
+
+  // 背景色のアイコン
+  const bgColorMap = {
+    normal: "#FFFFFF",
+    gray: "#E0E0E0",
+    brown: "#eee6e2",
+    orange: "#FFDAB9",
+    yellow: "#FFFF00",
+    green: "#90EE90",
+    blue: "#ADD8E6",
+    purple: "#DDA0DD",
+    pink: "#FFC0CB",
+    red: "#FFB6C1",
+  };
+
+  //メニューバーの生成
   const menuBar = document.createElement("div");
   menuBar.id = "notion-menu-bar";
   document.body.appendChild(menuBar);
@@ -290,19 +422,52 @@ function injectMenuBar() {
       btn.innerText = b.label;
       btn.className = "submenu-item";
 
+      //アイコン　色
+      if (textColorMap[b.type]) {
+        btn.prepend(createColorIcon(textColorMap[b.type]));
+      } else if (bgColorMap[b.type]) {
+        btn.prepend(createColorIcon(bgColorMap[b.type]));
+      }
+
       if (!b.supported) btn.classList.add("disabled"); //無効表示
       else {
         btn.onclick = () => {
+          updateSelectBlockId(); //カーソル位置を再取得
           const pageId = extractPageId(window.location.href);
           if (!pageId) return console.error("ページIDを取得できませんでした");
 
           // ブロック追加の確認
           chrome.runtime.sendMessage(
-            { action: "appendBlock", type: b.type, pageId },
+            {
+              action: "appendBlock",
+              type: b.type,
+              pageId,
+              afterBlockId: SelectBlockId,
+            },
             (res) => {
-              if (!res) return console.error("backgroundからのレスポンスなし");
-              if (!res.success) console.error(res.error);
-              else console.log("ブロック追加成功", res.data);
+              console.log("appendBlock res:", res);
+              if (!res) {
+                console.error("backgroundからのレスポンスなし");
+                return;
+              }
+              if (res.errorType === "token") {
+                showErrorModal(`
+                  <p>ページにインテグレーションが接続されていない、または拡張機能がインテグレーショントークンと正しく連携されていないため、ブロックを追加できませんでした。</p>
+                  <p>設定内容を確認してください。<br>接続方法がわからない場合は、以下のサイトをご覧ください。</p>
+                  <a href="https://private-1215.github.io/homepage/" target="_blank">接続方法はこちら</a>
+                `);
+              } else if (res.errorType === "not_loaded") {
+                showErrorModal(`
+                  <p>ブロックを追加できませんでした。</p>
+                  <p>原因として、ページの読み込みが完了していない、または追加したい行を選択していない可能性があります。</p>
+                  <p>ページをリロードした直後は読み込みに数秒かかる場合がありますので、数秒待ってから再度お試しください。</p>
+                  <p>また、ブロックを追加したい位置の行を選択してから実行してください。</p>                `);
+              }
+              if (!res.success) {
+                console.error("ブロック追加失敗:", res);
+                console.error(res.error);
+              } else console.log("ブロック追加成功", res);
+              //location.reload();//ブロック追加時にリロード
             }
           );
         };
@@ -322,24 +487,6 @@ function injectMenuBar() {
   document.addEventListener("click", closeAllMenus);
   window.addEventListener("resize", repositionOpenMenus);
   window.addEventListener("scroll", repositionOpenMenus, false);
-}
-
-// ページID抽出
-function extractPageId(url) {
-  const match = url.match(/[0-9a-f]{32}/);
-  if (!match) return console.log("ページIDが見つかりません");
-  const id = match[0];
-  return (
-    id.substr(0, 8) +
-    "-" +
-    id.substr(8, 4) +
-    "-" +
-    id.substr(12, 4) +
-    "-" +
-    id.substr(16, 4) +
-    "-" +
-    id.substr(20)
-  );
 }
 
 function toggleMenu(list) {
