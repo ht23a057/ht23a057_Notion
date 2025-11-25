@@ -32,13 +32,30 @@ chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
 });
 
 // 通常ブロック追加
-async function handleAppendBlock({ pageId, type }) {
+async function handleAppendBlock({ pageId, type, afterBlockId }) {
   const token = await getNotionToken();
-  if (!token) throw new Error("Notion トークンが設定されていません");
-
+  if (!token) {
+    return {
+      success: false,
+      errorType: "token",
+      message: "Notion トークンが設定されていません",
+    };
+  }
   const block = createBlock(type);
-  if (!block)
-    return { success: false, error: "対応していないブロックタイプです" };
+  if (!block) {
+    return {
+      success: false,
+      errorType: "unsupported",
+      message: "対応していないブロックタイプです",
+    };
+  }
+  const bodyObj = { children: [block] };
+  if (
+    afterBlockId !== null &&
+    afterBlockId !== undefined &&
+    afterBlockId !== ""
+  )
+    bodyObj.after = afterBlockId; //カーソル位置指定してなくても追加
 
   const res = await fetch(
     `https://api.notion.com/v1/blocks/${pageId}/children`,
@@ -49,14 +66,55 @@ async function handleAppendBlock({ pageId, type }) {
         "Content-Type": "application/json",
         "Notion-Version": "2022-06-28",
       },
-      body: JSON.stringify({ children: [block] }),
+      body: JSON.stringify(bodyObj),
     }
   );
   if (!res.ok) {
-    console.log("ブロックを追加できません");
-    throw new Error(`Notion API エラー: ${res.status} ${await res.text()}`);
+    const errText = await res.text();
+    // トークンの問題
+    if (res.status === 401 || res.status === 404)
+      return { success: false, errorType: "token", message: errText };
+    // Notion ページロードが終わっていないときの有名なエラー
+    if (errText.includes("is not parented"))
+      return { success: false, errorType: "not_loaded", message: errText };
+
+    return { success: false, errorType: "unsupported", message: errText };
   }
-  return { success: true, data: await res.json() };
+  const data = await res.json();
+  return { success: true, data };
+}
+
+//列ブロック
+function makeColumnBlock(columnCount) {
+  // 列リストブロックを作成
+  const columnList = {
+    object: "block",
+    type: "column_list",
+    column_list: {
+      children: [],
+    },
+  };
+
+  // 各列を追加
+  for (let i = 0; i < columnCount; i++) {
+    columnList.column_list.children.push({
+      object: "block",
+      type: "column",
+      column: {
+        children: [
+          {
+            object: "block",
+            type: "paragraph",
+            paragraph: {
+              rich_text: [{ type: "text", text: { content: "" } }],
+            },
+          },
+        ],
+      },
+    });
+  }
+
+  return columnList;
 }
 
 // ブロック作成関数　ブロックタイプに応じたAPIリクエスト用オブジェクト
@@ -67,6 +125,7 @@ function createBlock(type) {
         object: "block",
         type: "paragraph",
         paragraph: {
+          color: "default",
           rich_text: [{ type: "text", text: { content: "\u200b" } }],
         },
       };
@@ -224,6 +283,14 @@ function createBlock(type) {
           color: "default",
         },
       };
+    case "column_list_2":
+      return makeColumnBlock(2);
+    case "column_list_3":
+      return makeColumnBlock(3);
+    case "column_list_4":
+      return makeColumnBlock(4);
+    case "column_list_5":
+      return makeColumnBlock(5);
 
     case "code_Mermaid":
       return {
@@ -261,11 +328,11 @@ function createBlock(type) {
         object: "block",
         type: "paragraph",
         paragraph: {
+          color: "default",
           rich_text: [
             {
               type: "text",
               text: { content: "黒" },
-              annotations: { color: "default" },
             },
           ],
         },
@@ -275,11 +342,11 @@ function createBlock(type) {
         object: "block",
         type: "paragraph",
         paragraph: {
+          color: "gray",
           rich_text: [
             {
               type: "text",
               text: { content: "灰色" },
-              annotations: { color: "gray" },
             },
           ],
         },
@@ -289,11 +356,11 @@ function createBlock(type) {
         object: "block",
         type: "paragraph",
         paragraph: {
+          color: "brown",
           rich_text: [
             {
               type: "text",
               text: { content: "茶" },
-              annotations: { color: "brown" },
             },
           ],
         },
@@ -303,11 +370,11 @@ function createBlock(type) {
         object: "block",
         type: "paragraph",
         paragraph: {
+          color: "orange",
           rich_text: [
             {
               type: "text",
               text: { content: "オレンジ" },
-              annotations: { color: "orange" },
             },
           ],
         },
@@ -317,11 +384,11 @@ function createBlock(type) {
         object: "block",
         type: "paragraph",
         paragraph: {
+          color: "yellow",
           rich_text: [
             {
               type: "text",
               text: { content: "黄" },
-              annotations: { color: "yellow" },
             },
           ],
         },
@@ -331,11 +398,11 @@ function createBlock(type) {
         object: "block",
         type: "paragraph",
         paragraph: {
+          color: "green",
           rich_text: [
             {
               type: "text",
               text: { content: "緑" },
-              annotations: { color: "green" },
             },
           ],
         },
@@ -345,11 +412,11 @@ function createBlock(type) {
         object: "block",
         type: "paragraph",
         paragraph: {
+          color: "blue",
           rich_text: [
             {
               type: "text",
               text: { content: "青" },
-              annotations: { color: "blue" },
             },
           ],
         },
@@ -359,11 +426,11 @@ function createBlock(type) {
         object: "block",
         type: "paragraph",
         paragraph: {
+          color: "purple",
           rich_text: [
             {
               type: "text",
               text: { content: "紫" },
-              annotations: { color: "purple" },
             },
           ],
         },
@@ -373,11 +440,11 @@ function createBlock(type) {
         object: "block",
         type: "paragraph",
         paragraph: {
+          color: "pink",
           rich_text: [
             {
               type: "text",
               text: { content: "ピンク" },
-              annotations: { color: "pink" },
             },
           ],
         },
@@ -387,11 +454,11 @@ function createBlock(type) {
         object: "block",
         type: "paragraph",
         paragraph: {
+          color: "red",
           rich_text: [
             {
               type: "text",
               text: { content: "赤" },
-              annotations: { color: "red" },
             },
           ],
         },
