@@ -37,7 +37,6 @@
     if (document.getElementById("single-fav-btn")) return; // 重複防止
 
     const coverUrl = await getTemplateThumbnail();
-    console.log("選択されたテンプレートサムネイル:", coverUrl);
 
     const favorites = await getFavorites();
     const currentUrl = location.href;
@@ -67,8 +66,6 @@
           coverUrl: coverUrl,
         });
         favBtn.innerText = "お気に入りから削除";
-        console.log("お気に入りに登録しました：", coverUrl);
-        console.log("テンプレート名前", cleanTitle);
       }
 
       await saveFavorites(updatedFavorites);
@@ -120,11 +117,7 @@
       if (tmpl.coverUrl) {
         const img = document.createElement("img");
         img.src = tmpl.coverUrl;
-        img.onload = () => console.log("画像読み込み成功:", tmpl.coverUrl);
-        img.onerror = () => console.warn("画像読み込み失敗:", tmpl.coverUrl);
         card.appendChild(img);
-      } else {
-        console.warn("coverUrl が存在しない:", tmpl);
       }
 
       const label = document.createElement("p");
