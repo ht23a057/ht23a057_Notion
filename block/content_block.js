@@ -1,12 +1,86 @@
-//URL変わったらリロードする
-let currentUrl = location.href;
-setInterval(() => {
-  if (location.href !== currentUrl) {
-    currentUrl = location.href;
-    console.log("URLが変わった！リロードします:", currentUrl);
-    location.reload(); // ページをリロード
-  }
-}, 500); // 0.5秒ごとにチェック
+//インストール時にモーダル表示
+//初期化
+let allowReload = false;
+chrome.storage.local.get(["installModalReloaded"], (data) => {
+  allowReload = !!data.installModalReloaded;
+
+  chrome.storage.local.get(
+    ["installModalShown", "needShowInstallModal"],
+    (d2) => {
+      if (!d2.installModalShown && d2.needShowInstallModal) {
+        showInstallModal();
+      }
+    }
+  );
+  startUrlWatcher(); //URL監視
+});
+
+// モーダル表示
+function showInstallModal() {
+  const old = document.getElementById("install-modal");
+  if (old) old.remove();
+
+  const modal = document.createElement("div");
+  modal.id = "install-modal";
+  modal.className = "my-modal-overlay"; // エラーモーダルと同じクラス
+
+  const box = document.createElement("div");
+  box.className = "my-modal-box";
+
+  const title = document.createElement("div");
+  title.className = "my-modal-title";
+  title.textContent = "拡張機能のインストール完了";
+
+  const msg = document.createElement("div");
+  msg.className = "my-modal-message";
+  msg.innerHTML = `
+    拡張機能のインストールが完了しました。<br>
+    利用するには、まずインテグレーションを取得して接続する必要があります。<br>
+      取得・接続方法がわからない方は、こちらの「Notion接続ガイド」をご覧ください：
+    <a href="https://private-1215.github.io/homepage/" target="_blank">Notion接続ガイド</a>
+    </p>
+    <p>
+    手順をご存じの方は「OK」を押して、インテグレーションの取得・接続を行ってください。<br>
+    その後、拡張アイコンをクリックしてトークンを入力すると拡張機能が使用可能になります。  
+    `;
+
+  const btn = document.createElement("button");
+  btn.className = "my-modal-button";
+  btn.textContent = "OK";
+  btn.onclick = () => {
+    modal.remove();
+    // 初回リロード許可
+    chrome.storage.local.set(
+      {
+        installModalShown: true,
+        needShowInstallModal: false,
+        installModalReloaded: true,
+      },
+      () => location.reload()
+    );
+  };
+
+  box.appendChild(title);
+  box.appendChild(msg);
+  box.appendChild(btn);
+  modal.appendChild(box);
+  document.body.appendChild(modal);
+}
+
+// URL監視（重要）
+function startUrlWatcher() {
+  let currentUrl = location.href;
+
+  setInterval(() => {
+    if (location.href !== currentUrl) {
+      currentUrl = location.href;
+
+      if (allowReload) location.reload();
+
+      injectMenuBar();
+    }
+  }, 800);
+}
 
 const blockGroups = [
   {
@@ -20,27 +94,9 @@ const blockGroups = [
       { label: "番号付きリスト", type: "numbered_list_item", supported: true },
       { label: "ToDoリスト", type: "to_do", supported: true },
       { label: "トグルリスト", type: "toggle", supported: true },
-      { label: "ページ", type: "child_page", supported: false },
       { label: "コールアウト", type: "callout", supported: true },
       { label: "引用", type: "quote", supported: true },
-      { label: "テーブル", type: "table", supported: false },
       { label: "区切り線", type: "divider", supported: true },
-      { label: "ページリンク", type: "unsupported", supported: false },
-    ],
-  },
-  {
-    group: "Notion AI",
-    blocks: [
-      { label: "続きを書く", type: "unsupported", supported: false },
-      { label: "翻訳言語", type: "unsupported", supported: false },
-      { label: "質問する", type: "unsupported", supported: false },
-      {
-        label: "このページについて質問する",
-        type: "unsupported",
-        supported: false,
-      },
-      { label: "短くする", type: "unsupported", supported: false },
-      { label: "その他", type: "unsupported", supported: false },
     ],
   },
   {
@@ -55,43 +111,10 @@ const blockGroups = [
     ],
   },
   {
-    group: "データベース",
-    blocks: [
-      { label: "テーブルビュー", type: "child_database", supported: false },
-      { label: "ボードビュー", type: "child_database", supported: false },
-      { label: "ギャラリービュー", type: "child_database", supported: false },
-      { label: "リストビュー", type: "child_database", supported: false },
-      { label: "フィードビュー", type: "child_database", supported: false },
-      { label: "カレンダービュー", type: "child_database", supported: false },
-      { label: "タイムラインビュー", type: "child_database", supported: false },
-      { label: "縦棒グラフ", type: "child_database", supported: false },
-      { label: "横棒グラフ", type: "child_database", supported: false },
-      { label: "線グラフ", type: "child_database", supported: false },
-      { label: "ドーナツグラフ", type: "child_database", supported: false },
-      { label: "フォーム", type: "child_database", supported: false },
-      {
-        label: "データベース：インライン",
-        type: "child_database",
-        supported: false,
-      },
-      {
-        label: "データベース：フルページ",
-        type: "child_database",
-        supported: false,
-      },
-      {
-        label: "データベースのリンクドビュー",
-        type: "child_database",
-        supported: false,
-      },
-    ],
-  },
-  {
     group: "応用",
     blocks: [
       { label: "目次", type: "table_of_contents", supported: true },
       { label: "式ブロック", type: "equation", supported: true },
-      { label: "ボタン", type: "unsupported", supported: false },
       { label: "階層リンク", type: "breadcrumb", supported: true },
       { label: "同期ブロック", type: "synced_block", supported: true },
       { label: "トグル見出し1", type: "heading_1_toggle", supported: true },
@@ -102,22 +125,6 @@ const blockGroups = [
       { label: "4列", type: "column_list_4", supported: true },
       { label: "5列", type: "column_list_5", supported: true },
       { label: "コード：Mermaid", type: "code_Mermaid", supported: true },
-      { label: "AIブロック", type: "unsupported", supported: false },
-      { label: "AIミーティングノート", type: "unsupported", supported: false },
-    ],
-  },
-  {
-    group: "インライン埋め込み",
-    blocks: [
-      { label: "ユーザーをメンション", type: "unsupported", supported: false },
-      { label: "ページをメンション", type: "unsupported", supported: false },
-      {
-        label: "日付またはリマインダー",
-        type: "unsupported",
-        supported: false,
-      },
-      { label: "絵文字", type: "unsupported", supported: false },
-      { label: "インライン式", type: "unsupported", supported: false },
     ],
   },
   {
@@ -178,38 +185,12 @@ const blockGroups = [
     ],
   },
   {
-    group: "インポート",
-    blocks: [
-      { label: "CSV", type: "unsupported", supported: false },
-      { label: "HTML", type: "unsupported", supported: false },
-      {
-        label: "テキストとマークダウン",
-        type: "unsupported",
-        supported: false,
-      },
-      { label: "Asana", type: "unsupported", supported: false },
-      { label: "Confluence", type: "unsupported", supported: false },
-      { label: "Googleドキュメント", type: "unsupported", supported: false },
-      { label: "Trello", type: "unsupported", supported: false },
-      { label: "Dropbox Paper", type: "unsupported", supported: false },
-      { label: "Evernote", type: "unsupported", supported: false },
-      { label: "Workflowy", type: "unsupported", supported: false },
-      { label: "Word", type: "unsupported", supported: false },
-      { label: "Monday", type: "unsupported", supported: false },
-      { label: "Quip", type: "unsupported", supported: false },
-      { label: "Zip", type: "unsupported", supported: false },
-      { label: "PDF", type: "unsupported", supported: false },
-    ],
-  },
-  {
     group: "ブロックタイプの変換",
     blocks: [
       { label: "テキスト", type: "paragraph", supported: true },
       { label: "見出し1", type: "heading_1", supported: true },
       { label: "見出し2", type: "heading_2", supported: true },
       { label: "見出し3", type: "heading_3", supported: true },
-      { label: "ページ", type: "child_page", supported: false },
-      { label: "ページとして移動", type: "unsupported", supported: false },
       { label: "箇条書きリスト", type: "bulleted_list_item", supported: true },
       { label: "番号付きリスト", type: "numbered_list_item", supported: true },
       { label: "ToDoリスト", type: "to_do", supported: true },
@@ -228,19 +209,7 @@ const blockGroups = [
       { label: "5列", type: "column_list_5", supported: true },
     ],
   },
-  {
-    group: "アクション",
-    blocks: [
-      {
-        label: "ブロックへのリンクをコピー",
-        type: "unsupported",
-        supported: false,
-      },
-      { label: "複製", type: "unsupported", supported: false },
-      { label: "別ページへ移動", type: "unsupported", supported: false },
-      { label: "削除", type: "unsupported", supported: false },
-    ],
-  },
+
   {
     group: "テキストの色",
     blocks: [
@@ -309,7 +278,6 @@ function updateSelectBlockId() {
   const node = sel?.anchorNode;
   const blockId = findBlockIdFromNode(node?.parentElement || node);
   if (blockId) SelectBlockId = blockId;
-  console.log("カーソル位置", SelectBlockId); //カーソル位置をコンソールに出す
 }
 document.addEventListener("mouseup", updateSelectBlockId);
 document.addEventListener("keyup", updateSelectBlockId);
@@ -434,7 +402,6 @@ function injectMenuBar() {
         btn.onclick = () => {
           updateSelectBlockId(); //カーソル位置を再取得
           const pageId = extractPageId(window.location.href);
-          if (!pageId) return console.error("ページIDを取得できませんでした");
 
           // ブロック追加の確認
           chrome.runtime.sendMessage(
@@ -445,29 +412,21 @@ function injectMenuBar() {
               afterBlockId: SelectBlockId,
             },
             (res) => {
-              console.log("appendBlock res:", res);
-              if (!res) {
-                console.error("backgroundからのレスポンスなし");
-                return;
-              }
               if (res.errorType === "token") {
                 showErrorModal(`
-                  <p>ページにインテグレーションが接続されていない、または拡張機能がインテグレーショントークンと正しく連携されていないため、ブロックを追加できませんでした。</p>
-                  <p>設定内容を確認してください。<br>接続方法がわからない場合は、以下のサイトをご覧ください。</p>
-                  <a href="https://private-1215.github.io/homepage/" target="_blank">接続方法はこちら</a>
+                  <p>ページにインテグレーションが接続されていない、または拡張機能がインテグレーショントークンと正しく設定されていないため、ブロックを追加できませんでした。</p>
+                  <p>設定内容を確認してください。<br>接続方法がわからない場合は、以下の「Notion接続ガイド」をご覧ください。</p>
+                  <a href="https://private-1215.github.io/homepage/" target="_blank">Notion接続ガイド</a>
                 `);
               } else if (res.errorType === "not_loaded") {
                 showErrorModal(`
                   <p>ブロックを追加できませんでした。</p>
                   <p>原因として、ページの読み込みが完了していない、または追加したい行を選択していない可能性があります。</p>
-                  <p>ページをリロードした直後は読み込みに数秒かかる場合がありますので、数秒待ってから再度お試しください。</p>
-                  <p>また、ブロックを追加したい位置の行を選択してから実行してください。</p>                `);
+                  <p>ページをリロードした直後は読み込みに数秒かかる場合があります。少し待ってから再度お試しください。</p>
+                  <p>また、ブロックを追加したい位置の行を選択してから実行してください。</p>
+                  <p>※列ブロックを選択している場合、Notion APIの仕様上ブロックを追加できません。</p>              
+                `);
               }
-              if (!res.success) {
-                console.error("ブロック追加失敗:", res);
-                console.error(res.error);
-              } else console.log("ブロック追加成功", res);
-              //location.reload();//ブロック追加時にリロード
             }
           );
         };

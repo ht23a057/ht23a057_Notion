@@ -4,20 +4,22 @@
   background: #2b6cb0;
   color: white;
   padding: 1px;
-  gap: 20px; /*各メニューの間隔 */
+  gap: 20px;
   font-family: sans-serif;
-  /* ページ上部に表示 */
   position: fixed;
   top: 30px;
-  left: 120px;   /* 左端から10px離す */
-  right: 120px;  /* 右端から10px離す */
-  z-index: 9999; /*他の要素より手前に表示*/
-  width: auto;
-  overflow-x: auto;
+  left: 0;
+  right: 0;
+  margin: 0 auto;       /* これで中央寄せ */
+  z-index: 9999;
+  width: max-content;    /* メニューの幅に合わせる */
+  max-width: calc(100vw - 20px);
+  overflow-x: auto;      /* 横スクロール */
   overflow-y: visible;
-  scrollbar-width: none; /* Firefoxでスクロールバーを非表示 */
-  white-space: nowrap; /* 折り返さない */
+  white-space: nowrap;
+  scrollbar-width: none;
 }
+
 
 /* 各メニューセクション */
 .menu-section {
@@ -92,58 +94,4 @@
 }
 body, .notion-frame {
   transition: opacity 0.3s ease;
-}
-
-/* モーダルの背景 */
-.my-modal-overlay {
-  position: fixed;
-  top: 0;
-  left: 0;
-  width: 100vw;
-  height: 100vh;
-  background: rgba(0,0,0,0.45);
-  display: flex;
-  justify-content: center;
-  align-items: center;
-  z-index: 999999;
-}
-
-/* モーダル本体 */
-.my-modal-box {
-  background: #fff;
-  padding: 50px 50px;
-  border-radius: 12px;
-  box-shadow: 0 4px 16px rgba(0,0,0,0.2);
-  width: 400px;
-  text-align: center;
-  font-family: sans-serif;
-}
-
-/* タイトル */
-.my-modal-title {
-  font-size: 23px;
-  font-weight: bold;
-  margin-bottom: 12px;
-}
-
-/* メッセージ */
-.my-modal-message {
-  font-size: 20px;
-  color: #000000;
-  margin-bottom: 20px;
-}
-
-/* OKボタン */
-.my-modal-button {
-  padding: 8px 20px;
-  font-size: 14px;
-  border: none;
-  border-radius: 6px;
-  background: #007aff;
-  color: white;
-  cursor: pointer;
-}
-
-.my-modal-button:hover {
-  opacity: 0.9;
 }
