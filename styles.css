@@ -1,0 +1,55 @@
+/* モーダル本体 */
+.my-modal-box {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    background: white;
+    border: 1px solid #ccc;
+    padding: 20px;
+    z-index: 9999;
+  }
+
+  /* モーダルの背景 */
+.my-modal-overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    width: 100vw;
+    height: 100vh;
+    background: rgba(0,0,0,0.45);
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    z-index: 999999;
+  }  
+  
+  /* タイトル */
+  .my-modal-title {
+    font-size: 23px;
+    font-weight: bold;
+    margin-bottom: 12px;
+  }
+  
+  /* メッセージ */
+  .my-modal-message {
+    font-size: 20px;
+    color: #000000;
+    margin-bottom: 20px;
+  }
+  
+  /* OKボタン */
+  .my-modal-button {
+    padding: 8px 20px;
+    font-size: 14px;
+    border: none;
+    border-radius: 6px;
+    background: #007aff;
+    color: white;
+    cursor: pointer;
+  }
+  
+  .my-modal-button:hover {
+    opacity: 0.9;
+  }
+  

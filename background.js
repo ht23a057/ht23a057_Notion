@@ -1,16 +1,94 @@
 import { getNotionToken } from "./token/tokenManager.js";
 
+//インストール時にモーダル表示
+chrome.runtime.onInstalled.addListener((details) => {
+  if (details.reason === "install") {
+    chrome.storage.local.set({ needShowInstallModal: true });
+
+    chrome.tabs.query({}, (tabs) => {
+      tabs.forEach((tab) => {
+        if (tab.url.includes("notion.so")) {
+          chrome.scripting
+            .insertCSS({
+              target: { tabId: tab.id },
+              files: ["styles.css"],
+            })
+            .then(() => {
+              chrome.scripting.executeScript({
+                target: { tabId: tab.id },
+                func: () => {
+                  chrome.storage.local.get(
+                    ["installModalShown", "needShowInstallModal"],
+                    (data) => {
+                      if (
+                        !data.installModalShown &&
+                        data.needShowInstallModal
+                      ) {
+                        if (document.getElementById("install-modal")) return;
+
+                        const modal = document.createElement("div");
+                        modal.id = "install-modal";
+                        modal.className = "my-modal-overlay";
+
+                        const box = document.createElement("div");
+                        box.className = "my-modal-box";
+
+                        const title = document.createElement("div");
+                        title.className = "my-modal-title";
+                        title.textContent = "拡張機能のインストール完了";
+
+                        const msg = document.createElement("div");
+                        msg.className = "my-modal-message";
+                        msg.innerHTML = `
+                        拡張機能のインストールが完了しました。<br>
+                        利用するには、まずインテグレーションを取得して接続する必要があります。<br>
+                        取得・接続方法がわからない方は、こちらの操作ガイドをご覧ください：
+                        <a href="https://private-1215.github.io/homepage/" target="_blank">操作ガイド</a>
+                        </p>
+                        <p>
+                        手順をご存じの方は「OK」を押して、インテグレーションの取得・接続を行ってください。<br>
+                        その後、拡張アイコンをクリックしてトークンを入力すると拡張機能が使用可能になります。  
+                        `;
+
+                        const btn = document.createElement("button");
+                        btn.className = "my-modal-button";
+                        btn.textContent = "OK";
+                        btn.onclick = () => {
+                          modal.remove();
+                          chrome.storage.local.set(
+                            {
+                              installModalShown: true,
+                              needShowInstallModal: false,
+                              installModalReloaded: true,
+                            },
+                            () => location.reload() // リロード
+                          );
+                        };
+
+                        box.appendChild(title);
+                        box.appendChild(msg);
+                        box.appendChild(btn);
+                        modal.appendChild(box);
+                        document.body.appendChild(modal);
+                      }
+                    }
+                  );
+                },
+              });
+            });
+        }
+      });
+    });
+  }
+});
+
 // メッセージ受信
 chrome.runtime.onMessage.addListener((msg, sender, sendResponse) => {
   if (msg.action === "appendBlock") {
-    handleAppendBlock(msg)
-      .then((blockRes) => {
-        sendResponse(blockRes);
-      })
-      .catch((err) => {
-        console.error("appendBlock error:", err);
-        sendResponse({ success: false, error: err.message });
-      });
+    handleAppendBlock(msg).then((blockRes) => {
+      sendResponse(blockRes);
+    });
+
     return true; // 非同期レスポンスを維持
   }
 
@@ -49,14 +127,18 @@ async function handleAppendBlock({ pageId, type, afterBlockId }) {
       message: "対応していないブロックタイプです",
     };
   }
-  const bodyObj = { children: [block] };
-  if (
-    afterBlockId !== null &&
-    afterBlockId !== undefined &&
-    afterBlockId !== ""
-  )
-    bodyObj.after = afterBlockId; //カーソル位置指定してなくても追加
-
+  // カーソル位置にブロック追加 指定されていない時はページ末尾
+  let bodyObj;
+  if (afterBlockId && afterBlockId !== pageId) {
+    bodyObj = {
+      children: [block],
+      after: afterBlockId,
+    };
+  } else {
+    bodyObj = {
+      children: [block],
+    };
+  }
   const res = await fetch(
     `https://api.notion.com/v1/blocks/${pageId}/children`,
     {
@@ -222,8 +304,6 @@ function createBlock(type) {
         },
       };
 
-    //データベース
-
     //応用
     case "table_of_contents":
       return {
@@ -308,7 +388,6 @@ function createBlock(type) {
         },
       };
 
-    //インライン埋め込み
     //埋め込み
     case "embed":
       return {
@@ -319,9 +398,7 @@ function createBlock(type) {
           caption: [],
         },
       };
-    //インポート
-    //ブロックタイプの変換
-    //アクション
+
     //テキストの色
     case "normal_text":
       return {
@@ -643,7 +720,7 @@ async function handleToggleFavorite(msg, sendResponse) {
       favorites.push({
         id: templateTitle,
         title: cleanTitle,
-        url: templateTitle,
+        url: templateUrl,
         thumbnail: `https://www.google.com/s2/favicons?sz=64&domain_url=${templateUrl}`,
         addedAt: new Date().toISOString(),
       });
